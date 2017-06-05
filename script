@@ -1,0 +1,41 @@
+
+#!/bin/bash  
+#copy file and restart tomcat
+ 
+tomcat_path=/usr/local/tomcat2
+project=easy-springmvc-maven
+war_name=easy-springmvc-maven.war
+war_path=http://192.168.106.128:8080/jenkins/job/jeekins-test/ws/target
+server_port=8082
+file_path=/home/bingyue/.jenkins/jobs/jeekins-test/workspace/target
+ 
+now=$(date +"%Y%m%d%H%M%S")
+echo "the shell execute time is ${now}"
+ 
+echo `lsof -n -P -t -i :${server_port}`
+tomcat_pid=`lsof -n -P -t -i :${server_port}`
+echo "the tomcat_pid is ${tomcat_pid}"
+ 
+if [ "${tomcat_pid}" != "" ]; then 
+   kill -9 $tomcat_pid
+   echo "kill the server"
+fi 
+ 
+echo "rm ${tomcat_path}/webapps/${war_name}"
+rm ${tomcat_path}/webapps/${war_name}
+ 
+echo "rm -rf ${tomcat_path}/webapps/${project}"
+rm -rf ${tomcat_path}/webapps/${project}
+ 
+cd $file_path
+if [ -f ${war_name} ]; then 
+   cp ${war_name} ${tomcat_path}/webapps 
+else
+   echo "${war_name} unexists"
+fi
+ 
+export JAVA_HOME=/data/jdk7
+export CATALINA_HOME2=/usr/local/apache-tomcat-2
+export CATALINA_BASE2=/usr/local/apache-tomcat-2
+$tomcat_path/bin/startup.sh
+echo "server restarted"
